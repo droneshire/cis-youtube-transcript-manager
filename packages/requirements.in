@@ -1,0 +1,11 @@
+google-api-python-client
+youtube-transcript-api
+streamlit
+pandas
+python-dotenv
+ruff
+black
+isort
+mypy
+pylint
+autopep8

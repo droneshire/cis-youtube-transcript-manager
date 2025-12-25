@@ -40,8 +40,8 @@ init: create_dirs
 install:
 	$(PIP) install --upgrade pip
 	$(PIP) install pip-tools uv
-	$(MAYBE_UV) $(PIP_COMPILE) --strip-extras --output-file=$(PACKAGES_PATH)/requirements-dev.txt $(PACKAGES_PATH)/base_requirements.in $(PACKAGES_PATH)/dev_requirements.in
-	$(MAYBE_UV) $(PIP) install $(INSTALL_SYSTEM_ARGS) -r $(PACKAGES_PATH)/requirements-dev.txt
+	$(MAYBE_UV) $(PIP_COMPILE) --strip-extras --output-file=$(PACKAGES_PATH)/requirements.txt $(PACKAGES_PATH)/requirements.in
+	$(MAYBE_UV) $(PIP) install $(INSTALL_SYSTEM_ARGS) -r $(PACKAGES_PATH)/requirements.txt
 
 install_requirements:
 	$(PIP) install --upgrade pip
@@ -90,7 +90,7 @@ endif
 
 upgrade: install
 	pip install --upgrade $$(pip freeze | awk '{split($$0, a, "=="); print a[1]}')
-	pip freeze > $(PACKAGES_PATH)/requirements-dev.txt
+	pip freeze > $(PACKAGES_PATH)/requirements.txt
 
 clean_all_pycache:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
@@ -104,9 +104,12 @@ clean:
 	rm -rf .coverage
 	rm -rf dump.rdb
 	rm -rf Makefile.flattened
-	rm -rf $(PACKAGES_PATH)/requirements*.txt
+	rm -rf $(PACKAGES_PATH)/requirements.txt
 	$(MAKE) clean_all_pycache
 
+run_youtube_app:
+	$(RUN_PY_DIRECT) streamlit run $(SOURCE_PATH)/executables/youtube_app.py
+
 .PHONY: create_dirs init install format check_format mypy pylint autopep8 isort lint
-.PHONY: test upgrade clean
+.PHONY: test upgrade clean run_youtube_app
 # End Makefile

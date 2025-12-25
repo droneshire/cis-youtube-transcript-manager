@@ -1,9 +1,10 @@
 """YouTubeHelper class for interacting with YouTube API and transcripts."""
 
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List, Optional
+
 from googleapiclient.discovery import build
 from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
+from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisabled
 
 
 class YouTubeHelper:
@@ -18,10 +19,9 @@ class YouTubeHelper:
         """
         self.api_key = api_key
         self.youtube = build("youtube", "v3", developerKey=api_key)
+        self.transcript_api = YouTubeTranscriptApi()
 
-    def get_video_ids_from_channel(
-        self, channel_id: str, max_results: int = 50
-    ) -> List[str]:
+    def get_video_ids_from_channel(self, channel_id: str, max_results: int = 50) -> List[str]:
         """
         Get video IDs from a YouTube channel.
 
@@ -32,11 +32,11 @@ class YouTubeHelper:
         Returns:
             List of video IDs
         """
-        video_ids = []
+        video_ids: List[str] = []
         next_page_token = None
 
         while len(video_ids) < max_results:
-            request = self.youtube.search().list(
+            request = self.youtube.search().list(  # pylint: disable=no-member
                 part="id",
                 channelId=channel_id,
                 type="video",
@@ -55,9 +55,7 @@ class YouTubeHelper:
 
         return video_ids[:max_results]
 
-    def get_video_ids_from_playlist(
-        self, playlist_id: str, max_results: int = 50
-    ) -> List[str]:
+    def get_video_ids_from_playlist(self, playlist_id: str, max_results: int = 50) -> List[str]:
         """
         Get video IDs from a YouTube playlist.
 
@@ -68,11 +66,11 @@ class YouTubeHelper:
         Returns:
             List of video IDs
         """
-        video_ids = []
+        video_ids: List[str] = []
         next_page_token = None
 
         while len(video_ids) < max_results:
-            request = self.youtube.playlistItems().list(
+            request = self.youtube.playlistItems().list(  # pylint: disable=no-member
                 part="contentDetails",
                 playlistId=playlist_id,
                 maxResults=min(50, max_results - len(video_ids)),
@@ -89,9 +87,7 @@ class YouTubeHelper:
 
         return video_ids[:max_results]
 
-    def get_video_ids_from_search(
-        self, query: str, max_results: int = 50
-    ) -> List[str]:
+    def get_video_ids_from_search(self, query: str, max_results: int = 50) -> List[str]:
         """
         Get video IDs from a search query.
 
@@ -102,11 +98,11 @@ class YouTubeHelper:
         Returns:
             List of video IDs
         """
-        video_ids = []
+        video_ids: List[str] = []
         next_page_token = None
 
         while len(video_ids) < max_results:
-            request = self.youtube.search().list(
+            request = self.youtube.search().list(  # pylint: disable=no-member
                 part="id",
                 q=query,
                 type="video",
@@ -135,7 +131,9 @@ class YouTubeHelper:
         Returns:
             Dictionary containing video statistics and metadata
         """
-        request = self.youtube.videos().list(part="statistics,snippet,contentDetails", id=video_id)
+        request = self.youtube.videos().list(  # pylint: disable=no-member
+            part="statistics,snippet,contentDetails", id=video_id
+        )
         response = request.execute()
 
         if not response.get("items"):
@@ -176,7 +174,7 @@ class YouTubeHelper:
 
         for i in range(0, len(video_ids), batch_size):
             batch = video_ids[i : i + batch_size]
-            request = self.youtube.videos().list(
+            request = self.youtube.videos().list(  # pylint: disable=no-member
                 part="statistics,snippet,contentDetails", id=",".join(batch)
             )
             response = request.execute()
@@ -230,11 +228,11 @@ class YouTubeHelper:
         """
         try:
             if languages:
-                transcript_list = YouTubeTranscriptApi.get_transcript(
-                    video_id, languages=languages
-                )
+                transcript = self.transcript_api.fetch(video_id, languages=languages)
             else:
-                transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+                transcript = self.transcript_api.fetch(video_id)
+
+            transcript_list = transcript.to_raw_data()
 
             if preserve_formatting:
                 return transcript_list
@@ -252,7 +250,7 @@ class YouTubeHelper:
             return formatted_transcript
 
         except (TranscriptsDisabled, NoTranscriptFound) as e:
-            raise
+            raise e
 
     def get_transcript_text(
         self,
