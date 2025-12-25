@@ -13,7 +13,7 @@ from constants import YOUTUBE_API_KEY, YOUTUBE_CHANNEL_ID
 from youtube_helper import YouTubeHelper
 
 
-def initialize_session_state():
+def initialize_session_state() -> None:
     """Initialize session state variables."""
     if "youtube_helper" not in st.session_state:
         st.session_state.youtube_helper = None
@@ -93,7 +93,7 @@ def duration_to_seconds(duration: str) -> int:
     return hours * 3600 + minutes * 60 + seconds
 
 
-def main():
+def main() -> None:
     """Main Streamlit app."""
     st.set_page_config(page_title="YouTube Transcript Manager", layout="wide")
 
@@ -114,7 +114,10 @@ def main():
         channel_id = st.text_input(
             "Channel ID",
             value=YOUTUBE_CHANNEL_ID or "",
-            help="Enter the YouTube channel ID to fetch videos from (or set YOUTUBE_CHANNEL_ID in .env)",
+            help=(
+                "Enter the YouTube channel ID to fetch videos from "
+                "(or set YOUTUBE_CHANNEL_ID in .env)"
+            ),
         )
 
         if st.button("Load Videos", type="primary"):
@@ -181,7 +184,7 @@ def main():
         # Filter out Shorts if checkbox is checked
         # Shorts are defined as: <= 60 seconds OR has hashtags in title
         if filter_shorts:
-            is_short_duration = duration_seconds > 0 and duration_seconds <= 60
+            is_short_duration = 0 < duration_seconds <= 60
             has_hashtags = "#" in title
             if is_short_duration or has_hashtags:
                 continue
@@ -208,11 +211,18 @@ def main():
 
         if stats:
             st.markdown("---")
-            st.header("Video Statistics")
+            st.header("Video Player")
+
+            # YouTube video embed
+            embed_url = f"https://www.youtube.com/embed/{selected_video_id}"
+            st.components.v1.iframe(embed_url, width=None, height=500, scrolling=False)
 
             # YouTube video link
             video_url = f"https://www.youtube.com/watch?v={selected_video_id}"
             st.markdown(f"🔗 [Watch on YouTube]({video_url})")
+
+            st.markdown("---")
+            st.header("Video Statistics")
 
             col1, col2, col3, col4 = st.columns(4)
 
@@ -301,7 +311,7 @@ def main():
                         }
                     )
                 if transcript_df_data:
-                    import pandas as pd
+                    import pandas as pd  # type: ignore[import-untyped]
 
                     df = pd.DataFrame(transcript_df_data)
                     st.dataframe(df, width="stretch", hide_index=True)
