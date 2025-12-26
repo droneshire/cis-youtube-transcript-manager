@@ -17,7 +17,7 @@
       ]
     }
   },
-  "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f packages/requirements.txt ] && cp packages/requirements.txt requirements.txt 2>/dev/null || true; [ -f requirements.txt ] && pip3 install --user -r requirements.txt || ([ -f packages/requirements.txt ] && pip3 install --user -r packages/requirements.txt); echo '✅ Packages installed and Requirements met'",
+  "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; command -v git-lfs >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y git-lfs); git lfs install && git lfs pull; [ -f packages/requirements.txt ] && cp packages/requirements.txt requirements.txt 2>/dev/null || true; [ -f requirements.txt ] && pip3 install --user -r requirements.txt || ([ -f packages/requirements.txt ] && pip3 install --user -r packages/requirements.txt); echo '✅ Packages installed and Requirements met'",
   "postAttachCommand": {
     "server": "streamlit run src/executables/youtube_app.py --server.enableCORS false --server.enableXsrfProtection false"
   },
