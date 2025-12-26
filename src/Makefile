@@ -1,7 +1,7 @@
 PYTHON ?= python3
 PIP ?= pip3
 MAYBE_UV = uv
-PIP_COMPILE = $(if $(MAYBE_UV),pip compile,uv pip-compile)
+PIP_COMPILE = $(if $(MAYBE_UV),pip3 compile,uv pip3-compile)
 # -- INSTALL_SYSTEM_ARGS ?= "--system --break-system-packages"
 
 # Core paths
