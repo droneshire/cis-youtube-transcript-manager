@@ -1,10 +1,17 @@
 """Streamlit webapp for YouTube video management and transcript viewing."""
 
+import sys
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisabled
+
+# Add src directory to Python path for imports (works in all environments)
+_current_file = Path(__file__).resolve()
+_src_path = _current_file.parent.parent
+if str(_src_path) not in sys.path:
+    sys.path.insert(0, str(_src_path))
 
 from constants import YOUTUBE_API_KEY, YOUTUBE_CHANNEL_ID
 from youtube_helper import YouTubeHelper
