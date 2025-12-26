@@ -1,11 +1,6 @@
 """Streamlit webapp for YouTube video management and transcript viewing."""
 
-import sys
-from pathlib import Path
-
-# Add parent directory to path to import youtube_helper
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
+import pandas as pd
 import streamlit as st
 from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisabled
 
@@ -93,6 +88,8 @@ def duration_to_seconds(duration: str) -> int:
     return hours * 3600 + minutes * 60 + seconds
 
 
+# pylint: disable=too-many-statements
+# pylint: disable=too-many-branches
 def main() -> None:
     """Main Streamlit app."""
     st.set_page_config(page_title="YouTube Transcript Manager", layout="wide")
@@ -311,7 +308,6 @@ def main() -> None:
                         }
                     )
                 if transcript_df_data:
-                    import pandas as pd  # type: ignore[import-untyped]
 
                     df = pd.DataFrame(transcript_df_data)
                     st.dataframe(df, width="stretch", hide_index=True)

@@ -1,11 +1,15 @@
+# Application dependencies
 google-api-python-client
-youtube-transcript-api
-streamlit
 pandas
 python-dotenv
-ruff
+streamlit
+youtube-transcript-api
+
+# Development tools
+autopep8
 black
 isort
 mypy
+pandas-stubs
 pylint
-autopep8
+ruff
