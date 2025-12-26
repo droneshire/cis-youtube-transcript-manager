@@ -1,5 +1,5 @@
-PYTHON ?= python
-PIP ?= pip
+PYTHON ?= python3
+PIP ?= pip3
 MAYBE_UV = uv
 PIP_COMPILE = $(if $(MAYBE_UV),$(PIP) compile,uv pip-compile)
 # -- INSTALL_SYSTEM_ARGS ?= "--system --break-system-packages"
