@@ -1,7 +1,7 @@
-PYTHON ?= python3
-PIP ?= pip3
+PYTHON ?= python
+PIP ?= pip
 MAYBE_UV = uv
-PIP_COMPILE = $(if $(MAYBE_UV),pip3 compile,uv pip3-compile)
+PIP_COMPILE = $(if $(MAYBE_UV),$(PIP) compile,uv pip-compile)
 # -- INSTALL_SYSTEM_ARGS ?= "--system --break-system-packages"
 
 # Core paths
@@ -73,8 +73,8 @@ else
 endif
 
 upgrade: install
-	pip install --upgrade $$(pip freeze | awk '{split($$0, a, "=="); print a[1]}')
-	pip freeze > $(PACKAGES_PATH)/requirements.txt
+	$(PIP) install --upgrade $$($(PIP) freeze | awk '{split($$0, a, "=="); print a[1]}')
+	$(PIP) freeze > $(PACKAGES_PATH)/requirements.txt
 
 clean_all_pycache:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
