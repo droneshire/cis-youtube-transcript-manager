@@ -1,9 +1,9 @@
 """Streamlit webapp for YouTube video management and transcript viewing."""
 
-import os
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
-from pathlib import Path
 from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisabled
 
 from constants import YOUTUBE_API_KEY, YOUTUBE_CHANNEL_ID
@@ -119,6 +119,27 @@ def main() -> None:
 
     # Sidebar for configuration
     with st.sidebar:
+        # Download Executable section - available without credentials
+        st.header("📥 Download Executable")
+        executable_path = get_executable_path()
+        if executable_path:
+            try:
+                with open(executable_path, "rb") as f:
+                    executable_data = f.read()
+                file_size_mb = len(executable_data) / (1024 * 1024)
+                st.download_button(
+                    label=f"Download App ({file_size_mb:.1f} MB)",
+                    data=executable_data,
+                    file_name="youtube-transcript-manager",
+                    mime="application/octet-stream",
+                    help="Download the standalone executable application",
+                )
+            except Exception as e:
+                st.error(f"Error reading executable: {str(e)}")
+        else:
+            st.info("Executable not found. Run 'make py_package' to build the executable first.")
+
+        st.markdown("---")
         st.header("Configuration")
         api_key = st.text_input(
             "YouTube API Key",
@@ -168,28 +189,6 @@ def main() -> None:
             6. Download transcript if needed
             """
         )
-
-        st.markdown("---")
-        st.markdown("### Download Executable")
-        executable_path = get_executable_path()
-        if executable_path:
-            try:
-                with open(executable_path, "rb") as f:
-                    executable_data = f.read()
-                file_size_mb = len(executable_data) / (1024 * 1024)
-                st.download_button(
-                    label=f"Download App ({file_size_mb:.1f} MB)",
-                    data=executable_data,
-                    file_name="youtube-transcript-manager",
-                    mime="application/octet-stream",
-                    help="Download the standalone executable application",
-                )
-            except Exception as e:
-                st.error(f"Error reading executable: {str(e)}")
-        else:
-            st.info(
-                "Executable not found. Run 'make py_package' to build the executable first."
-            )
 
     # Main content area
     if not st.session_state.youtube_helper:

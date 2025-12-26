@@ -6,12 +6,14 @@ import sys
 import time
 import webbrowser
 
+
 def _free_port() -> int:
     s = socket.socket()
     s.bind(("127.0.0.1", 0))
-    port = s.getsockname()[1]
+    port: int = s.getsockname()[1]  # type: ignore[assignment]
     s.close()
     return port
+
 
 def main() -> int:
     port = _free_port()
@@ -19,7 +21,7 @@ def main() -> int:
     # Handle both development and PyInstaller packaged environments
     if getattr(sys, "frozen", False):
         # Running in a PyInstaller bundle
-        base_path = sys._MEIPASS
+        base_path: str = getattr(sys, "_MEIPASS", "")  # type: ignore[attr-defined]
         app_path = os.path.join(base_path, "executables", "youtube_app.py")
         # Add base_path to PYTHONPATH so imports work
         env = os.environ.copy()
@@ -41,7 +43,9 @@ def main() -> int:
             env["PYTHONPATH"] = src_path
 
     # Start Streamlit
-    proc = subprocess.Popen(
+    # We intentionally don't use 'with' here because we need to keep the process
+    # running and manage its lifecycle manually (wait for it, handle interrupts)
+    proc = subprocess.Popen(  # pylint: disable=consider-using-with
         [
             sys.executable,
             "-m",
@@ -67,6 +71,7 @@ def main() -> int:
     except KeyboardInterrupt:
         proc.terminate()
         return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
