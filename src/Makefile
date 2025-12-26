@@ -1,5 +1,5 @@
-PYTHON ?= python
-PIP ?= pip
+PYTHON ?= python3
+PIP ?= pip3
 MAYBE_UV = uv
 PIP_COMPILE = $(if $(MAYBE_UV),pip compile,uv pip-compile)
 # -- INSTALL_SYSTEM_ARGS ?= "--system --break-system-packages"
@@ -9,7 +9,7 @@ LOG_PATH=$(PWD)/logs
 SOURCE_PATH=$(PWD)/src
 PACKAGES_PATH=$(PWD)/packages
 PY_VENV=$(PWD)/venv
-PY_SITE_PACKAGES=$(PY_VENV)/lib/python3.12/site-packages
+PY_SITE_PACKAGES=$(PY_VENV)/lib/$(shell $(PYTHON) -c 'import sys; print("python{}.{}".format(sys.version_info[0], sys.version_info[1]))')/site-packages
 
 PY_PATH:=$(SOURCE_PATH)
 
