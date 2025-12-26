@@ -11,5 +11,6 @@ black
 isort
 mypy
 pandas-stubs
+pyinstaller
 pylint
 ruff

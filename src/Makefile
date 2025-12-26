@@ -89,14 +89,19 @@ clean:
 	rm -rf dump.rdb
 	rm -rf Makefile.flattened
 	rm -rf $(PACKAGES_PATH)/requirements.txt
+	rm -rf $(PWD)/dist
+	rm -rf $(PWD)/build
 	$(MAKE) clean_all_pycache
 
 run_youtube_app:
 	$(RUN_PY_DIRECT) streamlit run $(SOURCE_PATH)/executables/youtube_app.py
 
+py_package:
+	PYTHONPATH="$(PY_PATH)" $(PYTHON) -m PyInstaller $(PWD)/pyinstaller.spec --clean
+
 copy_requirements:
 	cp $(PACKAGES_PATH)/requirements.txt $(PWD)/requirements.txt
 
 .PHONY: create_dirs init install format check_format mypy pylint autopep8 isort lint
-.PHONY: test upgrade clean run_youtube_app copy_requirements
+.PHONY: test upgrade clean run_youtube_app py_package copy_requirements
 # End Makefile
