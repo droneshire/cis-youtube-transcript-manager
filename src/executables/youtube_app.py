@@ -97,18 +97,64 @@ def duration_to_seconds(duration: str) -> int:
     return hours * 3600 + minutes * 60 + seconds
 
 
+def _ensure_lfs_files() -> None:
+    """Ensure Git LFS files are downloaded if needed (for Streamlit Cloud)."""
+    import subprocess
+
+    # Get project root
+    current_file = Path(__file__).resolve()
+    project_root = current_file.parent.parent.parent
+    executable_path = project_root / "dist" / "youtube-transcript-manager"
+
+    # Check if file exists but is a pointer (LFS file not downloaded)
+    if executable_path.exists():
+        try:
+            # Read first line to check if it's an LFS pointer
+            with open(executable_path, "r", encoding="utf-8") as f:
+                first_line = f.readline().strip()
+                if first_line == "version https://git-lfs.github.com/spec/v1":
+                    # It's a pointer file, try to pull LFS files
+                    try:
+                        subprocess.run(
+                            ["git", "lfs", "pull"],
+                            cwd=project_root,
+                            check=True,
+                            capture_output=True,
+                            timeout=30,
+                        )
+                    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+                        # Git LFS not available or failed - that's okay, just continue
+                        pass
+        except (UnicodeDecodeError, PermissionError):
+            # File is binary (already downloaded) or can't read - that's fine
+            pass
+
+
 def get_executable_path() -> Path | None:
     """Get the path to the packaged executable if it exists.
 
     Returns:
         Path to the executable if found, None otherwise
     """
+    # Ensure LFS files are downloaded (for Streamlit Cloud)
+    _ensure_lfs_files()
+
     # Get project root (go up from src/executables/ to project root)
     current_file = Path(__file__).resolve()
     project_root = current_file.parent.parent.parent
     executable_path = project_root / "dist" / "youtube-transcript-manager"
 
     if executable_path.exists() and executable_path.is_file():
+        # Verify it's not a pointer file
+        try:
+            with open(executable_path, "r", encoding="utf-8") as f:
+                first_line = f.readline().strip()
+                if first_line == "version https://git-lfs.github.com/spec/v1":
+                    # It's still a pointer, file not available
+                    return None
+        except (UnicodeDecodeError, PermissionError):
+            # File is binary (downloaded) - that's what we want
+            pass
         return executable_path
     return None
 
