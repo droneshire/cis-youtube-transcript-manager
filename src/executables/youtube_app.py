@@ -97,60 +97,40 @@ def duration_to_seconds(duration: str) -> int:
     return hours * 3600 + minutes * 60 + seconds
 
 
-def _ensure_lfs_files() -> None:
-    """Ensure Git LFS files are downloaded if needed (for Streamlit Cloud)."""
-    import subprocess
+def get_executable_download_url() -> str | None:
+    """Get the download URL for the executable from GitHub Releases.
 
-    # Get project root
-    current_file = Path(__file__).resolve()
-    project_root = current_file.parent.parent.parent
-    executable_path = project_root / "dist" / "youtube-transcript-manager"
-
-    # Check if file exists but is a pointer (LFS file not downloaded)
-    if executable_path.exists():
-        try:
-            # Read first line to check if it's an LFS pointer
-            with open(executable_path, "r", encoding="utf-8") as f:
-                first_line = f.readline().strip()
-                if first_line == "version https://git-lfs.github.com/spec/v1":
-                    # It's a pointer file, try to pull LFS files
-                    try:
-                        subprocess.run(
-                            ["git", "lfs", "pull"],
-                            cwd=project_root,
-                            check=True,
-                            capture_output=True,
-                            timeout=30,
-                        )
-                    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
-                        # Git LFS not available or failed - that's okay, just continue
-                        pass
-        except (UnicodeDecodeError, PermissionError):
-            # File is binary (already downloaded) or can't read - that's fine
-            pass
+    Returns:
+        Direct download URL if available, None otherwise
+    """
+    # GitHub repository info - update these if your repo is different
+    # Format: https://github.com/{owner}/{repo}/releases/latest/download/{filename}
+    github_repo = "droneshire/cis-youtube-transcript-manager"  # Update if needed
+    filename = "youtube-transcript-manager"
+    
+    # Direct download URL from GitHub Releases
+    # You can also use a specific release tag: /releases/download/v1.0.0/{filename}
+    return f"https://github.com/{github_repo}/releases/latest/download/{filename}"
 
 
 def get_executable_path() -> Path | None:
-    """Get the path to the packaged executable if it exists.
+    """Get the path to the packaged executable if it exists locally.
 
     Returns:
-        Path to the executable if found, None otherwise
+        Path to the executable if found locally, None otherwise
     """
-    # Ensure LFS files are downloaded (for Streamlit Cloud)
-    _ensure_lfs_files()
-
     # Get project root (go up from src/executables/ to project root)
     current_file = Path(__file__).resolve()
     project_root = current_file.parent.parent.parent
     executable_path = project_root / "dist" / "youtube-transcript-manager"
 
     if executable_path.exists() and executable_path.is_file():
-        # Verify it's not a pointer file
+        # Verify it's not a pointer file (from Git LFS)
         try:
             with open(executable_path, "r", encoding="utf-8") as f:
                 first_line = f.readline().strip()
                 if first_line == "version https://git-lfs.github.com/spec/v1":
-                    # It's still a pointer, file not available
+                    # It's a pointer, file not available locally
                     return None
         except (UnicodeDecodeError, PermissionError):
             # File is binary (downloaded) - that's what we want
@@ -175,7 +155,10 @@ def main() -> None:
         # Download Executable section - available without credentials
         st.header("📥 Download Executable")
         executable_path = get_executable_path()
+        download_url = get_executable_download_url()
+        
         if executable_path:
+            # Local file available - serve directly
             try:
                 with open(executable_path, "rb") as f:
                     executable_data = f.read()
@@ -189,8 +172,33 @@ def main() -> None:
                 )
             except Exception as e:
                 st.error(f"Error reading executable: {str(e)}")
+        elif download_url:
+            # No local file, but we have a download URL - provide link
+            st.markdown(
+                f"""
+                <a href="{download_url}" download="youtube-transcript-manager">
+                    <button style="
+                        background-color: #FF4B4B;
+                        color: white;
+                        padding: 0.5rem 1rem;
+                        border: none;
+                        border-radius: 0.25rem;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        width: 100%;
+                    ">
+                        📥 Download App (from GitHub Releases)
+                    </button>
+                </a>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.caption("💡 The executable is hosted on GitHub Releases for reliable downloads.")
         else:
-            st.info("Executable not found. Run 'make py_package' to build the executable first.")
+            st.info(
+                "Executable not available. "
+                "Upload it to GitHub Releases or run 'make py_package' to build locally."
+            )
 
         st.markdown("---")
         st.header("Configuration")
