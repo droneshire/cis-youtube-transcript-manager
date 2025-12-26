@@ -107,7 +107,7 @@ def get_executable_download_url() -> str | None:
     # Format: https://github.com/{owner}/{repo}/releases/latest/download/{filename}
     github_repo = "droneshire/cis-youtube-transcript-manager"  # Update if needed
     filename = "youtube-transcript-manager"
-    
+
     # Direct download URL from GitHub Releases
     # You can also use a specific release tag: /releases/download/v1.0.0/{filename}
     return f"https://github.com/{github_repo}/releases/latest/download/{filename}"
@@ -156,7 +156,7 @@ def main() -> None:
         st.header("📥 Download Executable")
         executable_path = get_executable_path()
         download_url = get_executable_download_url()
-        
+
         if executable_path:
             # Local file available - serve directly
             try:
