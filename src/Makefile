@@ -1,7 +1,7 @@
 PYTHON ?= python3
 PIP ?= pip3
 MAYBE_UV = uv
-PIP_COMPILE = $(if $(MAYBE_UV),$(PIP) compile,uv pip-compile)
+PIP_COMPILE = $(if $(MAYBE_UV),pip compile,uv pip-compile)
 # -- INSTALL_SYSTEM_ARGS ?= "--system --break-system-packages"
 
 # Core paths
@@ -41,7 +41,7 @@ install:
 	$(PIP) install --upgrade pip
 	$(PIP) install pip-tools uv
 	$(MAYBE_UV) $(PIP_COMPILE) --strip-extras --output-file=$(PACKAGES_PATH)/requirements.txt $(PACKAGES_PATH)/requirements.in
-	$(MAYBE_UV) $(PIP) install $(INSTALL_SYSTEM_ARGS) -r $(PACKAGES_PATH)/requirements.txt
+	$(MAYBE_UV) pip install $(INSTALL_SYSTEM_ARGS) -r $(PACKAGES_PATH)/requirements.txt
 
 format: isort
 	$(RUN_PY_DIRECT) ruff check --fix $(shell $(PY_FIND_COMMAND))
