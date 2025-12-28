@@ -13,8 +13,10 @@ _src_path = _current_file.parent.parent
 if str(_src_path) not in sys.path:
     sys.path.insert(0, str(_src_path))
 
+# pylint: disable=wrong-import-position
 from constants import YOUTUBE_API_KEY, YOUTUBE_CHANNEL_ID
 from youtube_helper import YouTubeHelper
+# pylint: enable=wrong-import-position
 
 
 def initialize_session_state() -> None:
